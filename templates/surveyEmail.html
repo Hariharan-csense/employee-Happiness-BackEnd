@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>{{title}}</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f8;
+    }
+    .container {
+      width: 100%;
+      padding: 20px 0;
+      display: flex;
+      justify-content: center;
+    }
+    .card {
+      background-color: #ffffff;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 95%;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    }
+    .header {
+      background: linear-gradient(90deg, #4e73df, #1cc88a);
+      color: #ffffff;
+      text-align: center;
+      padding: 30px;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+    .header p {
+      margin: 5px 0 0;
+      font-size: 16px;
+    }
+    .body {
+      padding: 30px;
+      color: #333333;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .body h3 {
+      color: #4e73df;
+      font-size: 20px;
+      margin: 15px 0;
+    }
+    .cta {
+      display: inline-block;
+      margin: 20px 0;
+      padding: 12px 25px;
+      background-color: #1cc88a;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+    .footer {
+      background-color: #f1f3f5;
+      padding: 20px;
+      text-align: center;
+      font-size: 13px;
+      color: #888888;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      
+      <!-- Header -->
+      <div class="header">
+        <h1>{{title}}</h1>
+        <p>New Survey Notification</p>
+      </div>
+      
+      <!-- Body -->
+      <div class="body">
+        <p>Hello <strong>{{fullName}}</strong>,</p>
+        <p>We are excited to inform you that a new survey has been created for you. Your feedback is very important!</p>
+        <h3>{{title}}</h3>
+        <p>{{message}}</p>
+        <a href="{{surveyLink}}" class="cta">Participate in Survey</a>
+        {{#if allowAnonymous}}
+        <p style="color:#e74a3b; font-weight:600;">This survey is anonymous.</p>
+        {{/if}}
+        <p>If you have any questions, feel free to contact your HR team.</p>
+        <p style="margin-top:20px;">Best regards,<br><strong>HR Team</strong></p>
+      </div>
+      
+      <!-- Footer -->
+      <div class="footer">
+        &copy; {{year}} Your Company. All rights reserved.
+      </div>
+    </div>
+  </div>
+</body>
+</html>
