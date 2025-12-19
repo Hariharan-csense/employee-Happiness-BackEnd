@@ -124,7 +124,7 @@ router.post("/create", verifyToken, async (req, res) => {
     }
 
     // 2️⃣ Insert survey session with status = "pending" by default
-    const [surveyId] = await knex("surveysession").insert({
+    const [surveyId] = await knex("SurveySession").insert({
       title,
       message,
       sentAt,
@@ -156,7 +156,7 @@ router.post("/create", verifyToken, async (req, res) => {
 
     // Optional: Update status to "sent" after emails are dispatched
     // You can decide if you want this behavior
-    await knex("surveysession")
+    await knex("SurveySession")
       .where("id", surveyId)
       .update({ status: "sent" });
 
@@ -343,7 +343,7 @@ router.post("/survey/respond", verifyToken, async (req, res) => {
 
     // Update survey status to "responded" on first response
     if (isNewResponse) {
-      await knex("surveysession")
+      await knex("SurveySession")
         .where({ id: surveyId })
         .whereNot("status", "responded")
         .update({ status: "responded" });
@@ -472,9 +472,9 @@ router.get("/responses", verifyToken, async (req, res) => {
       return res.status(400).json({ error: "Company ID missing in token" });
     }
 
-    const responses = await knex("surveyresponses as sr")
+    const responses = await knex("SurveyResponses as sr")
       // 🔥 Join survey session to filter by company
-      .join("surveysession as ss", "sr.surveyId", "ss.id")
+      .join("SurveySession as ss", "sr.surveyId", "ss.id")
 
       // 🔥 LEFT JOIN employees (anonymous-safe)
       .leftJoin("employees as e", "sr.employeeId", "e.id")

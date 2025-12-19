@@ -10,7 +10,7 @@ const sendSurveyMail = async ({ to, fullName, title, message, surveyId, allowAno
 
   // 2️⃣ Compile template with Handlebars
   const template = handlebars.compile(source);
-
+  
   // 3️⃣ Generate HTML with dynamic data
   const html = template({
     fullName,
