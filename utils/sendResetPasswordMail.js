@@ -24,7 +24,7 @@ const sendResetPasswordMail = async ({ to, fullName, email, password }) => {
 
     // 4️⃣ Send email
     await transporter.sendMail({
-        from: `"${companyName} HR" <${process.env.MAIL_USER}>`,
+        from: `"${companyName}" <${process.env.MAIL_USER}>`,
         to,
         subject: "Password Reset Information",
         html
