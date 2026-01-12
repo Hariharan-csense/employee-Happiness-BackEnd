@@ -5,6 +5,68 @@ const { JWT_SECRET, blacklistToken } = require('../middleware/auth');
 const { sendAdminRegisterMail}=require('../utils/sendAdminRegisterMail');
 const { sendResetPasswordMail } = require('../utils/sendResetPasswordMail');
 
+// exports.registerAdmin = async (req, res) => {
+//   const { companyName, adminName, email, password } = req.body;
+
+//   if (!companyName || !adminName || !email || !password) {
+//     return res.status(400).json({ error: "All fields are required" });
+//   }
+
+//   try {
+//     // 1️⃣ Check if admin exists
+//     const existingAdmin = await db("admins").where({ email }).first();
+//     if (existingAdmin) {
+//       return res.status(400).json({ error: "Admin already exists" });
+//     }
+
+//     // 2️⃣ Check if company exists or create it
+//     let company = await db("companies").where({ companyName }).first();
+
+//     if (!company) {
+//       const [companyId] = await db("companies").insert({ companyName });
+//       company = { id: companyId, companyName };
+//     }
+
+//     // 3️⃣ Hash password
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     // 4️⃣ Create admin
+//     const [adminId] = await db("admins").insert({
+//       company_id: company.id,
+//       full_name: adminName,
+//       email,
+//       password: hashedPassword
+//     });
+
+//     // 5️⃣ Send registration mail
+//     await sendAdminRegisterMail({
+//       to: email,
+//       companyName: company.companyName, // ✅ fixed
+//       adminName,
+//       email,
+//       password
+//     });
+
+//     // 6️⃣ Response
+//     res.status(201).json({
+//       success: true,
+//       message: "Admin registered successfully and email sent",
+//       user: {
+//         userId: adminId,
+//         companyId: company.id,
+//         name: adminName,
+//         email,
+//         role: "admin"
+//       }
+//     });
+
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// };
+
+
 exports.registerAdmin = async (req, res) => {
   const { companyName, adminName, email, password } = req.body;
 
@@ -16,7 +78,7 @@ exports.registerAdmin = async (req, res) => {
     // 1️⃣ Check if admin exists
     const existingAdmin = await db("admins").where({ email }).first();
     if (existingAdmin) {
-      return res.status(400).json({ error: "Admin already exists" });
+      return res.status(409).json({ error: "Admin already exists" });
     }
 
     // 2️⃣ Check if company exists or create it
@@ -35,31 +97,43 @@ exports.registerAdmin = async (req, res) => {
       company_id: company.id,
       full_name: adminName,
       email,
-      password: hashedPassword
+      password: hashedPassword,
     });
 
-    // 5️⃣ Send registration mail
+    // 5️⃣ Generate JWT token ✅
+    const token = jwt.sign(
+      {
+        userId: adminId,
+        companyId: company.id,
+        role: "admin",
+        email,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+    );
+
+    // 6️⃣ Send registration mail
     await sendAdminRegisterMail({
       to: email,
-      companyName: company.companyName, // ✅ fixed
+      companyName: company.companyName,
       adminName,
       email,
-      password
+      password,
     });
 
-    // 6️⃣ Response
+    // 7️⃣ Response with token ✅
     res.status(201).json({
       success: true,
-      message: "Admin registered successfully and email sent",
+      message: "Admin registered successfully",
+      token,
       user: {
         userId: adminId,
         companyId: company.id,
         name: adminName,
         email,
-        role: "admin"
-      }
+        role: "admin",
+      },
     });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
@@ -67,67 +141,7 @@ exports.registerAdmin = async (req, res) => {
 };
 
 
-// exports.login = async (req, res) => {
-//   const { email, password } = req.body;
 
-//   if (!email || !password) {
-//     return res.status(400).json({ error: 'Email and password are required' });
-//   }
-
-//   try {
-//     let user = null;
-//     let role = null;
-
-//     // 1️⃣ Check Admins table
-//     const admin = await db("admins").where({ email }).first();
-//     if (admin) {
-//       user = admin;
-//       role = "admin";
-//     }
-
-//     // 2️⃣ If not admin → check Employees table
-//     if (!user) {
-//       const employee = await db("employees").where({ email }).first();
-//       if (employee) {
-//         user = employee;
-//         role = "employee";
-//       }
-//     }
-
-//     // 3️⃣ If no user found
-//     if (!user) {
-//       return res.status(401).json({ error: "Invalid email or password" });
-//     }
-
-//     // 4️⃣ Validate password
-//     const isMatch = await bcrypt.compare(password, user.password);
-//     if (!isMatch) {
-//       return res.status(401).json({ error: "Invalid email or password" });
-//     }
-
-//     // 5️⃣ Generate JWT
-//     const token = jwt.sign(
-//       { id: user.id, email: user.email, role },
-//       JWT_SECRET,
-//       { expiresIn: "7d" }
-//     );
-
-//     res.json({
-//       token,
-//       user: {
-//         userId: user.id,
-//         companyId: user.company_id || null,
-//         name: role === "admin" ? user.full_name : user.name,
-//         email: user.email,
-//         role,
-//       }
-//     });
-
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ error: "Server error" });
-//   }
-// };
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
